@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.1.0 https://maven.apache.org/xsd/maven-4.1.0.xsd">
+    <modelVersion>4.1.0</modelVersion>
+    <parent><groupId>com.guicedee</groupId><artifactId>parent</artifactId><version>2.6.0</version><relativePath/></parent>
+    <artifactId>kotlin-parent</artifactId>
+    <version>2.6.0</version>
+    <packaging>pom</packaging>
+    <name>GuicedEE Kotlin</name>
+    <description>Kotlin integration over Vert.x coroutines using GuicedEE Future boundaries.</description>
+    <url>https://github.com/GuicedEE/Kotlin</url>
+    <scm><url>https://github.com/GuicedEE/Kotlin</url><connection>scm:git:https://github.com/GuicedEE/Kotlin.git</connection><developerConnection>scm:git:https://github.com/GuicedEE/Kotlin.git</developerConnection></scm>
+    <properties>
+        <kotlin.version>2.4.21</kotlin.version>
+        <kotlinx.coroutines.version>1.11.0</kotlinx.coroutines.version>
+        <maven.compiler.release>25</maven.compiler.release>
+        <maven.compiler.source>25</maven.compiler.source>
+        <maven.compiler.target>25</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <ignore.moditect>true</ignore.moditect>
+        <project.scm.nameUrl>GuicedEE/Kotlin</project.scm.nameUrl>
+    </properties>
+    <modules><module>vertx-lang-kotlin-coroutines</module><module>runtime</module><module>examples/basic</module></modules>
+    <dependencyManagement><dependencies>
+        <dependency><groupId>org.jetbrains.kotlin</groupId><artifactId>kotlin-bom</artifactId><version>${kotlin.version}</version><type>pom</type><scope>import</scope></dependency>
+        <dependency><groupId>org.jetbrains.kotlinx</groupId><artifactId>kotlinx-coroutines-bom</artifactId><version>${kotlinx.coroutines.version}</version><type>pom</type><scope>import</scope></dependency>
+        <dependency><groupId>com.guicedee</groupId><artifactId>guicedee-bom</artifactId><version>${guicedee.version}</version><type>pom</type><scope>import</scope></dependency>
+        <dependency><groupId>com.guicedee</groupId><artifactId>kotlin</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>com.guicedee.modules.services</groupId><artifactId>vertx-lang-kotlin-coroutines</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>tools.jackson.module</groupId><artifactId>jackson-module-kotlin</artifactId><version>${jackson.version}</version></dependency>
+    </dependencies></dependencyManagement>
+    <build>
+        <pluginManagement><plugins>
+            <plugin><groupId>org.codehaus.mojo</groupId><artifactId>build-helper-maven-plugin</artifactId>
+                <executions><execution><id>kotlin-sources</id><phase>generate-sources</phase><goals><goal>add-source</goal></goals><configuration><sources><source>${project.basedir}/src/main/kotlin</source></sources></configuration></execution></executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId><artifactId>kotlin-maven-plugin</artifactId><version>${kotlin.version}</version>
+                <configuration><jvmTarget>25</jvmTarget><javaParameters>true</javaParameters></configuration>
+                <executions>
+                    <execution><id>kotlin-compile</id><phase>process-sources</phase><goals><goal>compile</goal></goals><configuration><sourceDirs><sourceDir>${project.basedir}/src/main/kotlin</sourceDir><sourceDir>${project.basedir}/src/main/java</sourceDir></sourceDirs></configuration></execution>
+                    <execution><id>kotlin-test-compile</id><phase>process-test-sources</phase><goals><goal>test-compile</goal></goals><configuration><sourceDirs><sourceDir>${project.basedir}/src/test/kotlin</sourceDir></sourceDirs></configuration></execution>
+                </executions>
+            </plugin>
+        </plugins></pluginManagement>
+        <plugins>
+            <plugin><groupId>org.apache.maven.plugins</groupId><artifactId>maven-enforcer-plugin</artifactId><executions><execution><id>enforce-baseline</id><goals><goal>enforce</goal></goals><configuration><rules><requireMavenVersion><version>[4.0.0-rc-7,)</version></requireMavenVersion><requireJavaVersion><version>[25,)</version></requireJavaVersion></rules></configuration></execution></executions></plugin>
+        </plugins>
+    </build>
+</project>
