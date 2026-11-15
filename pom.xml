@@ -19,8 +19,11 @@
         <ignore.moditect>true</ignore.moditect>
         <project.scm.nameUrl>GuicedEE/Kotlin</project.scm.nameUrl>
     </properties>
-    <modules><module>vertx-lang-kotlin-coroutines</module><module>runtime</module><module>examples/basic</module></modules>
+    <modules><module>vertx-lang-kotlin-coroutines</module><module>runtime</module><module>mutiny-kotlin</module><module>mutiny</module><module>examples/basic</module></modules>
     <dependencyManagement><dependencies>
+        <dependency><groupId>io.smallrye.reactive</groupId><artifactId>mutiny-kotlin</artifactId><version>${smallrye.mutiny.version}</version></dependency>
+        <dependency><groupId>com.guicedee.modules.services</groupId><artifactId>mutiny-kotlin</artifactId><version>${project.version}</version></dependency>
+        <dependency><groupId>com.guicedee</groupId><artifactId>kotlin-mutiny</artifactId><version>${project.version}</version></dependency>
         <dependency><groupId>org.jetbrains.kotlin</groupId><artifactId>kotlin-bom</artifactId><version>${kotlin.version}</version><type>pom</type><scope>import</scope></dependency>
         <dependency><groupId>org.jetbrains.kotlinx</groupId><artifactId>kotlinx-coroutines-bom</artifactId><version>${kotlinx.coroutines.version}</version><type>pom</type><scope>import</scope></dependency>
         <dependency><groupId>com.guicedee</groupId><artifactId>guicedee-bom</artifactId><version>${guicedee.version}</version><type>pom</type><scope>import</scope></dependency>

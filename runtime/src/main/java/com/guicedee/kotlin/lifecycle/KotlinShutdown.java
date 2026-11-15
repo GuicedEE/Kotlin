@@ -5,7 +5,7 @@ import com.guicedee.client.IGuiceContext;
 import com.guicedee.client.services.lifecycle.IGuicePreDestroy;
 import com.guicedee.kotlin.GuicedCoroutines;
 
-/** Stops owned coroutines before the shared Vert.x runtime closes. */
+/** Drains coroutine cleanup before persistence pools, clients and the shared Vert.x runtime close. */
 public final class KotlinShutdown implements IGuicePreDestroy<KotlinShutdown> {
     @Override
     public void onDestroy() {
@@ -19,6 +19,6 @@ public final class KotlinShutdown implements IGuicePreDestroy<KotlinShutdown> {
 
     @Override
     public Integer shutdownSortOrder() {
-        return Integer.MAX_VALUE - 300;
+        return Integer.MAX_VALUE - 2000;
     }
 }

@@ -60,7 +60,7 @@ shutdown always resolve the corresponding Future.
 * `start { ... }` returns `CoroutineCall<T>` with `future` and `cancel()`.
 * `shutdown()` rejects new calls, cancels owned jobs, and returns a Future that completes
   after their call-scope cleanup. It leaves the injected Vert.x runtime open.
-* The GuicedEE shutdown hook awaits cleanup before Vert.x teardown. The default limit is
+* The GuicedEE shutdown hook awaits cleanup before persistence pools and Vert.x teardown. The default limit is
   10 seconds, configured with `GUICEDEE_KOTLIN_SHUTDOWN_TIMEOUT_SECONDS` through `Environment`.
   `close()` is for non-event-loop lifecycle callers; use `shutdown()` asynchronously on an event loop.
 
@@ -79,6 +79,43 @@ A Vert.x Future has no cancellation method. Returning one from a REST endpoint d
 automatically cancel its coroutine when a client disconnects. Callers needing cancellation
 must retain the `CoroutineCall`, cancel it explicitly, or use a coroutine timeout. Application
 shutdown cancels all remaining owned work.
+
+## Optional Mutiny support
+
+Use `com.guicedee:kotlin-mutiny:2.6.0` in place of the core `kotlin` dependency and
+`requires com.guicedee.kotlin.mutiny;` in your application descriptor. This opt-in module
+combines the managed runtime with the upstream Mutiny coroutine adapters:
+
+```kotlin
+import io.smallrye.mutiny.coroutines.awaitSuspending
+
+fun customer(): Future<Customer> = coroutines.future {
+    customerClient.send().awaitSuspending()
+}
+```
+
+`awaitSuspending()` subscribes to the lazy `Uni`, suspends without blocking, propagates
+failure, and cancels the subscription when its coroutine is cancelled. A `Uni` can emit
+null, so use nullable Kotlin result types where appropriate. The upstream `asFlow`,
+`asMulti`, `asUni`, and Multi-await adapters are also available. Pass an owned coroutine
+scope to upstream coroutine builders; their default global scope is not managed by GuicedEE.
+
+The upstream `mutiny-kotlin` JAR shares `io.smallrye.mutiny` with Mutiny core. To avoid a
+JPMS split package, `com.guicedee.modules.services:mutiny-kotlin` includes its coroutine
+adapters without relocation and keeps the automatic module name `mutiny.kotlin` as an
+explicit module. Root-package convenience functions (`uni`, `multi`, tuple/failure helpers,
+`replaceWithUnit`) and the dependent `coroutines.multiSuspend` builder are excluded.
+The other coroutine classes and Kotlin metadata retain their original bytes. Do not add
+the original `io.smallrye.reactive:mutiny-kotlin` alongside this wrapper.
+
+Hibernate transaction cancellation needs an additional ownership rule: cancelling a Uni
+subscription alone does not prove its asynchronous rollback/session cleanup is finished.
+The [persistence example](https://github.com/GuicedEE/Examples/tree/master/Kotlin/Persistence)
+runs transaction work as a child of the caller and awaits the enclosing Hibernate operation
+in `NonCancellable`, allowing cancellation to fail the work while awaiting rollback and close.
+No session is shared between parallel operations. The
+[REST-client example](https://github.com/GuicedEE/Examples/tree/master/Kotlin/RestClient)
+demonstrates ordinary `@Endpoint` injection and Future-returning REST methods.
 
 ## JPMS
 
@@ -115,6 +152,8 @@ On Windows use `mvnw.cmd`. The reactor contains:
 | --- | --- |
 | `vertx-lang-kotlin-coroutines` | `com.guicedee.modules.services:vertx-lang-kotlin-coroutines` |
 | `runtime` | `com.guicedee:kotlin` |
+| `mutiny-kotlin` | `com.guicedee.modules.services:mutiny-kotlin` (upstream coroutine subset) |
+| `mutiny` | `com.guicedee:kotlin-mutiny` (optional integration) |
 | `examples/basic` | Executable HTTP/event-bus example; excluded from deployment |
 
 Runtime tests cover suspension/context identity, concurrent scope isolation, retained caller
@@ -139,4 +178,4 @@ their jobs in `GuicedCoroutines`.
 
 See the [Vert.x coroutine guide](https://vertx.io/docs/vertx-lang-kotlin-coroutines/kotlin/).
 
-Licensed under Apache-2.0. The wrapper retains upstream Vert.x code under its original license.
+Licensed under Apache-2.0. The wrappers retain upstream Vert.x and SmallRye code under their original licenses.

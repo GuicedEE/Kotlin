@@ -41,6 +41,7 @@ class GuicedCoroutinesTest {
         // The executable example separately validates application SPI discovery and lifecycle.
         IGuiceContext.loaderClasses["com.guicedee.client.services.lifecycle.IOnCallScopeEnter"] = emptySet()
         IGuiceContext.loaderClasses["com.guicedee.client.services.lifecycle.IOnCallScopeExit"] = emptySet()
+        CallScoper() // Register context locals before constructing this isolated Vert.x runtime.
         vertx = Vertx.vertx()
         val module = ServiceLoader.load(IGuiceModule::class.java).first { it.javaClass.name == "com.guicedee.kotlin.lifecycle.GuicedKotlinModule" }
         injector = Guice.createInjector(GuicedEEClientModule(), module, object : AbstractModule() {
@@ -184,9 +185,9 @@ class GuicedCoroutinesTest {
     }
 
     @Test
-    fun `shutdown provider is discoverable and precedes Vertx teardown`() {
+    fun `shutdown provider is discoverable and precedes persistence and Vertx teardown`() {
         val hook = ServiceLoader.load(IGuicePreDestroy::class.java).first { it.javaClass.name == "com.guicedee.kotlin.lifecycle.KotlinShutdown" }
-        assertTrue(hook.shutdownSortOrder() < Integer.MAX_VALUE - 200)
+        assertTrue(hook.shutdownSortOrder() < Integer.MAX_VALUE - 1000)
     }
 
     private fun <T> await(future: Future<T>): T = future.toCompletionStage().toCompletableFuture().get(5, TimeUnit.SECONDS)
