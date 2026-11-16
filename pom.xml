@@ -9,7 +9,23 @@
     <description>Kotlin integration over Vert.x coroutines using GuicedEE Future boundaries.</description>
     <url>https://github.com/GuicedEE/Kotlin</url>
     <scm><url>https://github.com/GuicedEE/Kotlin</url><connection>scm:git:https://github.com/GuicedEE/Kotlin.git</connection><developerConnection>scm:git:https://github.com/GuicedEE/Kotlin.git</developerConnection></scm>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+<developers>
+        <developer>
+            <id>GedMarc</id>
+            <name>Marc Magon</name>
+            <email>marc.magon@gmail.com</email>
+            <url>https://github.com/GedMarc</url>
+        </developer>
+    </developers>
     <properties>
+        <dokka.version>2.2.0</dokka.version>
         <kotlin.version>2.4.21</kotlin.version>
         <kotlinx.coroutines.version>1.11.0</kotlinx.coroutines.version>
         <maven.compiler.release>25</maven.compiler.release>
@@ -33,6 +49,12 @@
     </dependencies></dependencyManagement>
     <build>
         <pluginManagement><plugins>
+            <plugin><groupId>org.jetbrains.dokka</groupId><artifactId>dokka-maven-plugin</artifactId><version>${dokka.version}</version>
+                <executions><execution><id>kotlin-api-docs</id><phase>verify</phase><goals><goal>javadocJar</goal></goals></execution></executions>
+                <configuration><jdkVersion>25</jdkVersion><skip>${maven.javadoc.skip}</skip>
+                    <sourceDirectories><dir>${project.basedir}/src/main/kotlin</dir><dir>${project.build.directory}/source-output</dir></sourceDirectories>
+                </configuration>
+            </plugin>
             <plugin><groupId>org.codehaus.mojo</groupId><artifactId>build-helper-maven-plugin</artifactId>
                 <executions><execution><id>kotlin-sources</id><phase>generate-sources</phase><goals><goal>add-source</goal></goals><configuration><sources><source>${project.basedir}/src/main/kotlin</source></sources></configuration></execution></executions>
             </plugin>
